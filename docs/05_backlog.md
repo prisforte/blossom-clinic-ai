@@ -72,8 +72,8 @@ pessoa que preenche a sheet manual (origem do valor atual).
 |---|---|---|---|
 | 1 | Hora exata em que os artigos de 30% foram repostos na Mellmak (11-08) | por validar | operações/compras |
 | 2 | Lista final e validada de artigos a 30%, 50% e 70% | por validar | compras |
-| 3 | Confirmação de que todos os URLs de campanhas antigas continuam funcionais | por validar | marketing/dev |
-| 4 | Confirmação de que o catálogo Meta e o catálogo Google estão atualizados | por validar | marketing |
+| 3 | Confirmação de que todos os URLs de campanhas antigas continuam funcionais | **respondido 20-08** — 4/4 anúncios ativos testados carregam e têm produto (ver secção E) | marketing/dev |
+| 4 | Confirmação de que o catálogo Meta e o catálogo Google estão atualizados | **parcialmente respondido, negativo** — ver secção E | marketing |
 | 5 | Definição final da política de portes em Portugal (2,99€ vs 3,99€) e limite de portes grátis | por validar | comercial |
 | 6 | Reconciliação de devoluções, sem stock e cancelamentos | bloqueado | Redicom (fonte oficial, ver `00_system_constitution.md`) |
 | 7 | Correção das discrepâncias entre atribuição Redicom/GA4 e faturação oficial | bloqueado | ver item B.2 abaixo |
@@ -112,7 +112,50 @@ colunas definidas no sistema.
 | C.9 | Data Health: sinalizar fontes automáticas desatualizadas (B.1, B.2, B.6) | Fase 4 (UI) + Fase 6 (regra) | pronto para implementar |
 | C.10 | Data Health: reconciliação faturação total vs. por família (B.5) | Fase 4/6 | pronto para implementar como verificação, não como bloqueio |
 | C.11 | Métrica "vendas por categoria prioritária" (T-shirts, malas, sapatilhas, jeans) | Fase 3/4 | pendente — precisa de fonte estruturada, hoje só existe no briefing como números pontuais |
-| C.12 | Auditoria de catálogo/stock/preço/URL, catálogos Meta/Google, links de campanha | fora do Neptune COS | bloqueado — requer acesso direto a Redicom/PIM, Meta Business Manager e Google Ads, que esta sessão não tem; a executar por quem tem esse acesso |
+| C.12 | Auditoria de catálogo/stock/preço/URL, catálogos Meta/Google, links de campanha | fora do Neptune COS | **concluído parcialmente em 20-08**, via sessão do utilizador com acesso direto (ver secção E) — Google Merchant Center continua bloqueado por falta de permissão |
+| C.13 | Bloquear propostas de aumento de investimento até resolver stock crítico nos destinos de anúncios ativos (secção E.3) | Fase 6 (Decision Engine) | pronto para implementar — condição objetiva: ativo se ≥1 anúncio ativo aponta para produto com ≤2 unidades disponíveis |
+| C.14 | Corrigir/investigar 4.291 produtos com erro no feed "% de Descontos" (Meta) | fora do Neptune COS | bloqueado — a executar por quem gere o feed/catálogo Meta |
+| C.15 | Obter acesso ao Google Merchant Center 2107046214 (Mellmak) na conta usada para auditoria | fora do Neptune COS | bloqueado — pedir acesso a quem administra a conta Google Ads/Merchant Center da Mellmak |
+
+## E. Auditoria de catálogo e anúncios (20-08-2026, via acesso direto do utilizador)
+
+Fonte: extração direta em Meta Ads Manager, Meta Ad Library, Google Ads/
+Windsor.ai e Google Merchant Center. Só leitura — nada foi alterado
+(campanhas, orçamentos ou catálogos).
+
+**E.1 — Investimento diário (validação cruzada com a sheet manual):**
+confirma que os valores de investimento da sheet manual são fiáveis —
+Google bate ao cêntimo, Meta tem um desvio de 0,2% (atribuição). Ao
+contrário da faturação (item 0), aqui não há problema de fonte.
+
+**E.2 — Catálogo Meta não corresponde às listas de desconto nomeadas.**
+O conjunto de produtos em uso nos anúncios ("30% e 50% INV 22 21 20 19 18
+17 16", 10,5 mil produtos) foi criado em 18-11-2023 — não é a "Lista 30%
+Mellmak" / "Lista 50% Mellmak" (11-8 a 6-9-2026) referida em
+`03_business_rules.md` §3. Não é possível confirmar que os descontos atuais
+estão refletidos no catálogo publicitário. Feed complementar de descontos
+tem 4.291 produtos com erro de carregamento (de um total de 5.133).
+
+**E.3 — Risco de stock em anúncios ativos.** Dos 4 anúncios ativos
+testados com destino a páginas de saldos, 3 têm ≤2 unidades disponíveis no
+tamanho existente ou a maioria dos tamanhos esgotados. Há investimento
+ativo a gerar tráfego pago para produtos quase esgotados.
+
+**E.4 — Divergência criativo vs. página.** Os 4 criativos testados
+anunciam "até 70%"; as 4 páginas de destino estão todas a -50% (um deles
+até tem a inconsistência dentro do próprio anúncio: título 70%, descrição
+50%). Nenhum dos destinos testados chega a 70%.
+
+**E.5 — Google Merchant Center inacessível.** A conta Google usada na
+auditoria só tem acesso ao MC da Forte Store (131851149), não ao da
+Mellmak (2107046214, o associado à campanha ativa). Catálogo Google não
+pôde ser auditado — ver C.15.
+
+**E.6 — Conector Meta sem API disponível.** O Windsor.ai só tem Google Ads
+ligado para esta conta; os dados Meta vieram da UI do Ads Manager
+(relatório manual, não persistente). Confirma que o conector Meta em
+`/src/connectors/meta` (Fase 5) terá de prever, para já, um modo de
+importação manual/CSV além (ou em vez) de uma API direta.
 
 ## D. Fora de âmbito nesta sessão
 

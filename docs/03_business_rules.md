@@ -186,3 +186,12 @@ disponibilidade dos produtos anunciados, e os resultados financeiros
 oficiais do período. Só depois disso a proposta pode ser apresentada — e
 sempre como proposta sujeita a aprovação humana (ver Regra 6 da
 `00_system_constitution.md`).
+
+**Condição de bloqueio ativa (confirmada em 20-08-2026):** auditoria direta
+aos anúncios ativos encontrou 3 de 4 destinos de campanhas de saldos com
+stock quase esgotado (≤2 unidades no tamanho disponível ou maioria dos
+tamanhos esgotados) — ver `05_backlog.md` E.3. Enquanto esta condição se
+mantiver, **nenhuma proposta de aumento de investimento nestas campanhas
+deve ser apresentada**, independentemente do MER ou da trajetória face à
+meta — aumentar investimento agora significaria pagar por mais tráfego
+para produto que já não existe.
