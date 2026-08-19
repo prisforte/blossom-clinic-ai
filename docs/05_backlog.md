@@ -96,6 +96,8 @@ colunas definidas no sistema.
 | B.4 | "CAMPAIGNS 2026" não ligado | Coluna de campanha por dia no workbook mestre está vazia para 2026, apesar de a campanha "SALES" estar ativa e registada na folha `CAMPANHAS - META & GOOGLE 2026` | O gatilho de "época de descontos" da Regra Nuno Forte não pode assumir que este campo está fiável — usar antes a folha de campanhas diretamente |
 | B.5 | Gap de reconciliação faturação por família | Ex.: 18-08, faturação por família (Mulher+Homem+Criança+Unisexo) soma 8.466,48€ vs. faturação total oficial 9.311,00€ — gap de 844,52€ | Por resolver antes de usar dados por família/categoria em decisões de merchandising |
 | B.6 | `Custos publicidade` (folha legada) com erros `#REF!` | Referências quebradas na folha antiga de custos | Não usar como fonte; folha a descontinuar |
+| B.7 | Valor de compra (purchase value) do Google Ads/GA4 subavaliado na Mellmak | Ticket médio implícito Google ≈26€/compra vs. Meta ≈80€/compra (mesma loja, mesmo período); na Forte Store os dois batem certo (≈67€ vs. ≈67€). Aponta para configuração incorreta do parâmetro `value` no evento de compra do GA4/Google Ads da Mellmak, não para diferença real de eficiência | "Valor conv./custo" do Google para a Mellmak (10,02 em julho, 13,87 em 1-15 ago) está artificialmente inflacionado — não usar em decisões nem publicar externamente sem esta ressalva (ver Regra 5 da constituição) |
+| B.8 | Sheets manuais "CALCULOS FS E MM" (Meta+Google) não batem com a própria célula "TOTAL INVESTIMENTO" | Julho: Forte Store soma diária 21.385,33€ vs. célula 20.124,21€ (~6%); Mellmak soma diária 19.897,49€ vs. célula 18.954,01€ (~5%). Padrão idêntico nas duas sheets — suspeita de fórmula ligada a intervalo desatualizado, como já visto no workbook mestre (B.1/B.2) | Confiar na soma diária (validada contra Ads Manager, ver C.16) em vez da célula de total até se confirmar a causa |
 
 ## C. Backlog de implementação (Neptune COS)
 
@@ -116,6 +118,7 @@ colunas definidas no sistema.
 | C.13 | Bloquear propostas de aumento de investimento até resolver stock crítico nos destinos de anúncios ativos (secção E.3) | Fase 6 (Decision Engine) | pronto para implementar — condição objetiva: ativo se ≥1 anúncio ativo aponta para produto com ≤2 unidades disponíveis |
 | C.14 | Corrigir/investigar 4.291 produtos com erro no feed "% de Descontos" (Meta) | fora do Neptune COS | bloqueado — a executar por quem gere o feed/catálogo Meta |
 | C.15 | Obter acesso ao Google Merchant Center 2107046214 (Mellmak) na conta usada para auditoria | fora do Neptune COS | bloqueado — pedir acesso a quem administra a conta Google Ads/Merchant Center da Mellmak |
+| C.16 | Corrigir o parâmetro `value` do evento de compra GA4/Google Ads na Mellmak (B.7) | fora do Neptune COS | bloqueado — a executar por quem gere o tracking/GTM da Mellmak; validar depois nas duas plataformas |
 
 ## E. Auditoria de catálogo e anúncios (20-08-2026, via acesso direto do utilizador)
 
