@@ -10,6 +10,43 @@ Convenção de estado: `bloqueado` (depende de acesso/decisão externa) ·
 
 ---
 
+## 0. CRÍTICO — a Redicom tem 3 valores de faturação diferentes para o mesmo dia
+
+**Encontrado em:** 20-08-2026, durante extração de dados na Redicom para
+18-08-2026.
+
+| Relatório (Redicom) | Faturação 18-08-2026 |
+|---|---:|
+| Análise da Receita Diária | 9.790,96 € |
+| Resumo de Encomendas | 9.229,89 € |
+| Vendas Globais | 9.148,00 € |
+| *Sheet manual "MELLMAK" (usada em todas as análises anteriores)* | *9.311,00 €* |
+
+**Nenhum dos 3 relatórios da Redicom bate com o valor que temos vindo a
+tratar como "faturação oficial" em todas as análises de fecho de dia até
+agora.** Isto significa que:
+
+- A definição de "faturação oficial" na Regra 1 da `00_system_constitution.md`
+  ainda não está resolvida ao nível de qual relatório da Redicom usar.
+- A sheet manual "MELLMAK" parece usar um 4º critério, ainda não identificado.
+- **Toda a "Confiança dos dados" reportada como "Média" nas análises de
+  18-08 e no briefing operacional deve ser lida como "Baixa"** até isto
+  ficar resolvido — não é um gap de fonte secundária, é uma ambiguidade na
+  própria fonte oficial.
+
+**Ação em curso:** exportar os 3 relatórios em paralelo para 1-18 agosto
+(não decidir por eliminação nem ajustar até bater com o número já
+conhecido), identificar o que cada um inclui/exclui (portes, IVA,
+canceladas/pendentes, devoluções já descontadas), confirmar com o
+financeiro/gestão da Mellmak qual é o critério usado para reportar
+faturação, e confirmar com quem preenche a sheet manual de onde tira o
+valor que lá insere.
+
+**Dono:** financeiro/gestão Mellmak (definição do critério oficial) +
+pessoa que preenche a sheet manual (origem do valor atual).
+
+---
+
 ## A. Pontos por validar (origem: briefing operacional, secção 10)
 
 | # | Item | Estado | Dono |
