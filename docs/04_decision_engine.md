@@ -69,14 +69,32 @@ abaixo do limiar, regra ativa. Substitui a dependência do campo "Taxa
 abandono carrinho" do workbook mestre, que nunca esteve preenchido (ver
 `05_backlog.md` B.3, agora resolvido).
 
-**Complementar — funil de checkout (mesma fonte):** o painel "Funil do
-Checkout por Utilizador" da Redicom reporta as taxas de passagem
-Carrinho → Página de Pagamento → Resumo do Carrinho → Confirmação de
-Encomenda. No momento da verificação, a maior perda relativa estava entre
-Carrinho e Página de Pagamento (50% de passagem). Esta fonte deve
-alimentar a página Funnel do MVP (Fase 4) diretamente, substituindo a
-estimativa indireta usada até aqui (Sessões → Add to cart → Checkout, via
-GA4).
+**Causa raiz confirmada em 20-08-2026 (auditoria técnica de checkout, ver
+`05_backlog.md` F.11):** os 5% não são sinal de campanha fraca — são um
+teto estrutural. O email do cliente só é capturado no passo de
+Identificação (2.º passo do checkout real); quem abandona antes disso —
+exatamente onde está a maior perda absoluta do funil — é anónimo para o
+sistema de recuperação (Mautic). **A ação correta não é otimizar o
+conteúdo do email, é antecipar a captura de email para a gaveta do
+carrinho ou o 1.º passo do checkout.** Só faz sentido reavaliar esta regra
+depois dessa mudança ser feita.
+
+**Correção a uma nota anterior:** esta versão do documento continha uma
+leitura errada do funil ("maior perda relativa entre Carrinho e Página de
+Pagamento, 50% de passagem") — essa é, na verdade, a transição **mais
+eficiente** das três (50% é a melhor taxa de passagem do funil). As
+transições mais fracas são as seguintes (44% e 45% de passagem),
+correspondentes no site real aos passos de Identificação e Pagamento —
+ver `05_backlog.md` F.0.
+
+**Ressalva de fiabilidade (F.0, F.10):** a legenda do painel "Funil do
+Checkout por Utilizador" não corresponde à ordem real do checkout, e um
+erro de JavaScript no GTM (`$ is not defined`, 6x no passo de
+Identificação) pode estar a subcontar eventos. Confirmar com a Redicom o
+mapeamento exato de cada barra e alargar o intervalo para 30 dias antes
+de tratar os valores percentuais como definitivos — a existência da
+priorização (identificação/pagamento mais fracos que carrinho) é mais
+robusta do que os números exatos.
 
 ---
 

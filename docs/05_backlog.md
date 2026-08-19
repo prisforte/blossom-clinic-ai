@@ -163,6 +163,119 @@ ligado para esta conta; os dados Meta vieram da UI do Ads Manager
 `/src/connectors/meta` (Fase 5) terá de prever, para já, um modo de
 importação manual/CSV além (ou em vez) de uma API direta.
 
+## F. Auditoria do funil de checkout (20-08-2026, teste direto no site)
+
+Fonte: percurso real como visitante anónimo em mellmak.com, com inspeção
+de DOM/CSS/rede/consola. Nenhuma compra concluída, nenhuma definição
+alterada. Testado num único dia de dados de funil (2026-08-19, a decorrer)
+— os números absolutos não devem ser generalizados sem alargar o
+intervalo.
+
+**F.0 — O mapeamento do funil do dashboard não corresponde ao fluxo real
+do site.** A legenda mostra "Adicionou ao Carrinho → Página de Pagamento →
+Resumo do Carrinho → Confirmação Encomenda"; o fluxo real é "Resumo →
+Identificação → Pagamento → Imprimir Comprovativo". O passo
+"Identificação" (onde estão as piores fricções, ver F.4/F.5) não aparece
+como passo próprio. **Antes de usar estes números para decisões,
+confirmar com a Redicom a que evento corresponde cada barra.**
+
+**F.1 — Prioridade #1, esforço baixo, sem dependência externa: zona morta
+de layout entre 768px e 1130px.** `header`, `.containerFull` e `.steps`
+têm `min-width: 1130px` fixo; o breakpoint mobile só entra a 767px. Nessa
+faixa (iPad horizontal, portáteis Windows com escala 125-150%, janela de
+browser não maximizada), **os preços e o total ficam fora do ecrã** — o
+cliente é convidado a avançar sem ver quanto vai pagar. Confirmado
+também na Forte Store (mesma plataforma Redicom) — correção beneficia as
+duas lojas.
+
+**F.2 — Falha silenciosa na submissão de "Identificação" (guest
+checkout).** Em 2 de 3 tentativas, o POST a `actions_registo.php` ficou
+pendente e o cliente foi redirecionado para a homepage, perdendo nome,
+morada, código postal e localidade — sem mensagem de erro. Carrinho
+mantém-se, progresso não. Variável exata do gatilho ainda não isolada —
+precisa de log do lado servidor para medir frequência real.
+
+**F.3 — URLs intermédios do checkout ligados à sessão.** Reentrar num
+URL de checkout válido minutos antes redireciona para a homepage sem
+aviso — afeta botão "voltar", refresh, novo separador ou link guardado.
+Combinado com F.2, qualquer desvio ao caminho linear perfeito custa o
+checkout inteiro.
+
+**F.4 — Passo de Identificação funciona como muro de login, com registo
+pré-selecionado.** "Já é Cliente Registado?" ocupa a posição primária de
+leitura; o guest checkout está na coluna secundária; "Pretende
+registar-se?" vem com "Sim" pré-selecionado — o cliente tem de reparar e
+desmarcar ativamente.
+
+**F.5 — Passo de Identificação não mostra preço nem total, e o botão diz
+"Finalizar".** Cliente introduz morada às cegas quanto ao valor, e
+"Finalizar" sugere fim de processo quando ainda faltam 2 passos e o
+método de pagamento.
+
+**F.6 — Passo de Pagamento pede 28 campos, repetindo toda a morada** já
+pedida no passo anterior.
+
+**F.7 — Botão "INSERIR UM DESCONTO" duplicado com a secção "Código
+promocional"** no passo de Resumo, ambos com mais destaque visual que o
+total — padrão clássico que manda o cliente sair do site à procura de
+cupão. Não existe na Forte Store (mesma plataforma) — é específico da
+Mellmak.
+
+**F.8 — Mini-carrinho sem portes/previsão de entrega e sem CTA direto
+para pagamento**, e ausência de limiar de portes grátis (a alavanca mais
+direta para subir ticket médio e reduzir o atrito dos 2,99€ num carrinho
+de 20€). Nota positiva: os portes E o total já aparecem corretamente no
+passo 1 do checkout em si — não é um caso de "portes escondidos até ao
+fim".
+
+**F.9 — Widget "Assistente IA" sobrepõe-se a campos obrigatórios** do
+passo de Identificação, mais grave na zona morta de F.1.
+
+**F.10 — Erro de JavaScript no checkout pode estar a subcontar eventos
+do funil.** `ReferenceError: $ is not defined` disparado 6x no contentor
+GTM-WW3NKZ9 (tag dependente de jQuery em falta) durante a submissão do
+passo de Identificação; chamadas ao Google Analytics/Ads em paralelo
+devolveram 503. Reforça F.0 — as barras do dashboard podem não refletir
+o funil real. Não afeta o cliente diretamente, afeta a fiabilidade dos
+números usados para decidir.
+
+**F.11 — Explica a regra "recuperação de carrinho < 12%" do Decision
+Engine (ver `04_decision_engine.md` DE-3, pendente).** O email do cliente
+só é capturado no passo de Identificação — quem abandona antes disso
+(precisamente onde está a maior perda absoluta, F.0) é anónimo para o
+sistema de recuperação (Mautic). Os ~5% de recuperação não são sinal de
+uma campanha fraca — é o teto matemático de um sistema que só consegue
+identificar uma fração dos abandonos. A alavanca correta não é melhorar
+o email, é capturar o email mais cedo no funil (gaveta do carrinho ou
+passo 1).
+
+**F.12 — Campo de morada limitado a 28 caracteres**, insuficiente para
+muitas moradas portuguesas (ex.: "Rua Dr. António Bernardino de
+Almeida" tem 37) — risco de entregas falhadas.
+
+**F.13 — Infraestrutura Redicom a 80% de espaço utilizado** (aviso nativo
+do próprio dashboard) e tempo de resposta da listagem de produtos com
+variação grande (84ms–1,6s) entre leituras. Não é causa direta de
+abandono no checkout, mas merece acompanhamento.
+
+**Não testado:** viewport mobile real (<768px, ferramenta de teste não
+permitiu forçar); conteúdo/atraso reais do email/SMS de recuperação (por
+acordo, só diagnóstico técnico, ver F.11); variável exata do gatilho de
+F.2 (precisa de logs de servidor).
+
+**Ordem de ataque sugerida (da própria auditoria, esforço/impacto):**
+1. Remover `min-width: 1130px` / criar breakpoint intermédio (F.1)
+2. Instrumentar `actions_registo.php` para medir frequência de F.2
+3. Confirmar com a Redicom o mapeamento do funil (F.0) e alargar o
+   intervalo do dashboard para 30 dias antes de decidir com estes números
+4. Capturar o email mais cedo no funil (resolve F.11)
+5. Mostrar total no passo de Identificação; renomear "Finalizar" (F.5)
+6. Remover botão de desconto duplicado (F.7); CTA direto de pagamento no
+   mini-carrinho (F.8)
+7. Usar as gravações do Microsoft Clarity já instalado (filtrar por
+   `/checkout/v1/`) para confirmar a frequência real de F.1/F.2/F.3 em
+   minutos, antes de investir mais tempo de diagnóstico manual
+
 ## D. Fora de âmbito nesta sessão
 
 Os pontos 1–4 da secção 11 do briefing operacional (auditoria de catálogo em
