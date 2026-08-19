@@ -263,18 +263,94 @@ permitiu forçar); conteúdo/atraso reais do email/SMS de recuperação (por
 acordo, só diagnóstico técnico, ver F.11); variável exata do gatilho de
 F.2 (precisa de logs de servidor).
 
-**Ordem de ataque sugerida (da própria auditoria, esforço/impacto):**
-1. Remover `min-width: 1130px` / criar breakpoint intermédio (F.1)
-2. Instrumentar `actions_registo.php` para medir frequência de F.2
+**Ordem de ataque original (esforço/impacto, SUPERADA — ver secção G):**
+~~1. Remover `min-width: 1130px` / criar breakpoint intermédio (F.1)~~
+~~2. Instrumentar `actions_registo.php` para medir frequência de F.2~~
 3. Confirmar com a Redicom o mapeamento do funil (F.0) e alargar o
    intervalo do dashboard para 30 dias antes de decidir com estes números
 4. Capturar o email mais cedo no funil (resolve F.11)
 5. Mostrar total no passo de Identificação; renomear "Finalizar" (F.5)
 6. Remover botão de desconto duplicado (F.7); CTA direto de pagamento no
    mini-carrinho (F.8)
-7. Usar as gravações do Microsoft Clarity já instalado (filtrar por
-   `/checkout/v1/`) para confirmar a frequência real de F.1/F.2/F.3 em
-   minutos, antes de investir mais tempo de diagnóstico manual
+~~7. Usar Microsoft Clarity para confirmar F.1/F.2/F.3~~ → **feito, ver G**
+
+## G. Quantificação real via Microsoft Clarity (20-08-2026, 30 dias)
+
+Fonte: Microsoft Clarity, projeto `h7znnsrur0` (Mellmak), últimos 30 dias
+até 19-08-2026. Só leitura. **Corrige a priorização da secção F** — os
+volumes reais mudam o que é urgente.
+
+**Funil real (30 dias, muito mais robusto que o único dia do dashboard
+Redicom usado em F.0):** 1.520.259 sessões no site → 64.206 chegam ao
+checkout (4,22%) → 50.493 ao Resumo → 8.151 à Identificação → 6.388 ao
+Pagamento → **2.560 à Confirmação (3,99% das sessões de checkout)**. Nota:
+~5.100 das 6.388 que chegam ao Pagamento saltam a Identificação —
+já estavam autenticadas. F.4/F.5 (fricções da Identificação) afetam
+sobretudo tráfego não autenticado, não a totalidade do checkout.
+
+**G.1 — F.2 é maior e diferente do que se pensava: não é redirecionamento
+para a homepage, é perda de sessão/cookie, concentrada em webviews.**
+Existe um estado de erro explícito e silencioso (`err=2`) que devolve o
+utilizador ao formulário de login vazio, sem mensagem. Afeta **1.316
+sessões — 16,1% de todas as que chegam à Identificação**. Assinatura nas
+gravações: a sessão do Clarity começa já na página de erro (entrada =
+saída, 1 página, sessão nova) e concentra-se em **FacebookApp (19,17%),
+InstagramApp (12,67%) e MobileSafari (13,88%) — 38% de todo o tráfego de
+checkout.** Padrão clássico de bloqueio de cookies/storage em webviews
+in-app e Safari ITP, não de código partido. **Passa a ser a prioridade
+nº1** — é o único dos problemas testados com impacto direto e mensurável
+na conversão em volume real.
+
+**G.2 — Novo achado, não estava na auditoria original: erro
+`meta[itemprop=productid]` é 81% de todos os erros JS do checkout.**
+Um script (provavelmente de tracking/analytics) assume a existência de
+`meta[itemprop=productid]` em páginas que não são de produto, incluindo o
+checkout — 54.080 ocorrências em 30 dias, entre os dois erros dominantes:
+`cannot read properties of null (reading 'getattribute')` (57,72%) e a
+variante do `meta[itemprop]` (23,50%). Correção trivial (guard/null
+check) e potencialmente ligada aos mesmos problemas de tracking já
+documentados em `01_data_sources.md`.
+
+**G.3 — Novo achado: `validatephone_status is not defined`** — erro de
+JS do próprio checkout (validação de telefone), 1,8-5% dos erros
+consoante o segmento. Ao contrário de G.4, este é mesmo do checkout e
+merece investigação.
+
+**G.4 — F.10 estava mal atribuído: o erro `$ is not defined`
+não é um problema de checkout.** Apenas 1 sessão de checkout em 30 dias
+(0,002%) o dispara. As 432 sessões afetadas no site inteiro concentram-se
+em fichas de produto, tráfego mobile vindo de `m.facebook.com` (57,4%).
+**Retirar da lista de prioridades de checkout** — reportar separadamente,
+se relevante, como problema de páginas de produto.
+
+**G.5 — F.1 (zona morta 768-1130px) é real mas de volume marginal.**
+0,44% das sessões de checkout por segmento de dispositivo (Tablet, proxy
+mais limpo — o filtro por largura de documento está poluído porque
+sessões "Celular" aparecem com largura >767px, sinal de que a métrica de
+largura do Clarity já reflete o próprio overflow que queríamos medir).
+Confirmado visualmente em heatmap de tablet: bloco de totais colide com o
+rodapé. Continua a valer a pena corrigir (é barato), mas **deixa de ser a
+prioridade nº1** — G.1 tem 16-36× mais volume.
+
+**G.6 — Novo achado: existe um segundo checkout, `/checkout/p1/`, nunca
+auditado.** 7.661 page views em 30 dias, fora do âmbito de tudo o que
+foi testado até agora. Estado desconhecido.
+
+**Limitações do próprio Clarity, registadas para não repetir o erro:**
+sem filtro de intervalo de viewport (só >/</=), sem métrica de scroll
+horizontal, heatmap só em 3 larguras fixas — nenhuma delas cobre
+1024-1130px diretamente.
+
+**Nova ordem de ataque (substitui a de F, por volume real):**
+1. `err=2` — perda de sessão/cookie na Identificação, foco em Safari ITP
+   e webviews Facebook/Instagram (G.1) — 16,1% de quem chega ao passo
+2. Guard/null-check no script que assume `meta[itemprop=productid]`
+   (G.2) — 81% dos erros JS do checkout, correção trivial
+3. Investigar `validatephone_status is not defined` (G.3)
+4. Auditar `/checkout/p1/`, nunca testado (G.6)
+5. Zona morta 768-1130px (F.1/G.5) — barato, mas volume baixo
+6. Restantes itens de F (F.3 a F.9, F.12) por ordem de esforço
+7. `$ is not defined` (G.4) — não é checkout, reportar à parte ou ignorar
 
 ## D. Fora de âmbito nesta sessão
 
