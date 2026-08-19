@@ -1,9 +1,9 @@
 # 04 — Decision Engine
 
-**Estado:** Parcial — duas regras já confirmadas com dados reais da Mellmak
-(abaixo). O conjunto completo (MER, conversão, recuperação de carrinho,
-bloqueio por tracking crítico, etc., conforme Fase 6 do plano original)
-continua pendente de formalização.
+**Estado:** Parcial — três regras já confirmadas com dados reais da Mellmak
+(abaixo). O conjunto completo (MER, conversão, bloqueio por tracking
+crítico, etc., conforme Fase 6 do plano original) continua pendente de
+formalização.
 
 Todas as regras abaixo devolvem uma sugestão/alerta — nunca executam uma
 alteração em campanhas ou produção (Regra 6 da `00_system_constitution.md`).
@@ -52,14 +52,38 @@ corrigidas.
 **Em aberto** (ver `05_backlog.md` A.8, A.9): teto fora de época de
 descontos, e se o limite é sobre o mês ou sobre o período da campanha.
 
+### DE-3 — Oportunidade prioritária de recuperação de carrinho
+
+```
+taxa_recuperacao = Recuperados / (Abandonados + Recuperados)   [painel Redicom]
+
+se taxa_recuperacao < 12%:
+    oportunidade = "Recuperação de carrinho abaixo do saudável — prioridade"
+```
+
+**Fonte confirmada em 19-08-2026:** dashboard nativo da Redicom Commerce
+Cloud (`mellmak.redicom.cloud`, painel "Recuperação de Carrinho"),
+disponível em tempo real por intervalo de datas. Valor observado no
+momento da verificação (19-08, 15:51, dados do próprio dia): **5%** — bem
+abaixo do limiar, regra ativa. Substitui a dependência do campo "Taxa
+abandono carrinho" do workbook mestre, que nunca esteve preenchido (ver
+`05_backlog.md` B.3, agora resolvido).
+
+**Complementar — funil de checkout (mesma fonte):** o painel "Funil do
+Checkout por Utilizador" da Redicom reporta as taxas de passagem
+Carrinho → Página de Pagamento → Resumo do Carrinho → Confirmação de
+Encomenda. No momento da verificação, a maior perda relativa estava entre
+Carrinho e Página de Pagamento (50% de passagem). Esta fonte deve
+alimentar a página Funnel do MVP (Fase 4) diretamente, substituindo a
+estimativa indireta usada até aqui (Sessões → Add to cart → Checkout, via
+GA4).
+
 ---
 
 ## Regras ainda pendentes (Fase 6 original)
 
 - Alerta de MER: queda > 25% face à média dos últimos 3 dias
 - Verificação de checkout: queda de conversão > 20% com sessões estáveis/altas
-- Oportunidade prioritária: recuperação de carrinho < 12% — **bloqueada**
-  até existir fonte de dados (ver `05_backlog.md` B.3)
 - Bloqueio de recomendações de escala quando tracking crítico está ativo
 - Meta aumenta investimento sem crescimento proporcional de receita → não
   escalar novamente
