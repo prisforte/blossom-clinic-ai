@@ -34,13 +34,32 @@ agora.** Isto significa que:
   ficar resolvido — não é um gap de fonte secundária, é uma ambiguidade na
   própria fonte oficial.
 
-**Ação em curso:** exportar os 3 relatórios em paralelo para 1-18 agosto
-(não decidir por eliminação nem ajustar até bater com o número já
-conhecido), identificar o que cada um inclui/exclui (portes, IVA,
-canceladas/pendentes, devoluções já descontadas), confirmar com o
-financeiro/gestão da Mellmak qual é o critério usado para reportar
-faturação, e confirmar com quem preenche a sheet manual de onde tira o
-valor que lá insere.
+**Atualização 20-08-2026 — reconciliado a 50%.** Extração linha-a-linha da
+Redicom (encomendas de 1-18 agosto, nível de item) permitiu explicar 2 dos
+4 valores para 18-08:
+
+| Relatório | Valor | Metodologia encontrada nos dados brutos | Confirmado? |
+|---|---:|---|---|
+| Resumo de Encomendas | 9.229,89 € | `SUM(EncomendaValorTotal)` por encomenda única, Venda+Troca, agrupado pela **data de pagamento** (`EncomendaPaga`) | ✅ exato, ao cêntimo |
+| Vendas Globais | 9.148,00 € | `SUM(EncomendaValorTotal)` por encomenda única, só Tipo="Venda", agrupado pela **data da encomenda** (`EncomendaData`) | ≈ quase exato (calculado: 9.149,07€, diferença de 1,07€) |
+| Análise da Receita Diária | 9.790,96 € | Testado por data de fatura e por data de pagamento, com/sem trocas — nenhuma combinação bate | ❌ ainda não reconciliado |
+| Sheet manual "MELLMAK" | 9.311,00 € | Nenhuma combinação testada bate | ❌ ainda não reconciliado |
+
+**Causa raiz identificada para metade da divergência:** não é um erro de
+dados — é uma diferença de **critério de data** (data da encomenda vs. data
+de pagamento) e de **inclusão de trocas**. Isto tem de virar uma decisão
+formal de política: qual data é a "oficial" para reporting diário de
+faturação (impacta `02_kpi_master.md` e todo o Decision Engine).
+
+**Ação em curso:**
+1. Perguntar à Redicom/quem gere o sistema: que campo de data e que
+   filtros (loja física incluída? tipo de encomenda?) usa "Análise da
+   Receita Diária" — é o único ainda sem hipótese.
+2. Perguntar a quem preenche a sheet manual "MELLMAK" de onde tira o valor
+   — pode ser um export manual de um destes relatórios a uma hora de corte
+   diferente do dia.
+3. Confirmar com o financeiro/gestão qual data-base (encomenda vs.
+   pagamento) deve ser a oficial para a Regra 1 da constituição.
 
 **Dono:** financeiro/gestão Mellmak (definição do critério oficial) +
 pessoa que preenche a sheet manual (origem do valor atual).
