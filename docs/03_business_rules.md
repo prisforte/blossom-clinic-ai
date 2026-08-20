@@ -195,3 +195,20 @@ mantiver, **nenhuma proposta de aumento de investimento nestas campanhas
 deve ser apresentada**, independentemente do MER ou da trajetória face à
 meta — aumentar investimento agora significaria pagar por mais tráfego
 para produto que já não existe.
+
+## 8. Diferença estrutural Forte Store vs. Mellmak
+
+**Forte Store** tem loja física — a estratégia de descontos online tem de
+acompanhar/sincronizar com os descontos praticados nas lojas físicas
+(não pode divergir livremente).
+
+**Mellmak é 100% online, sem loja física** — isto permite maior agilidade
+e competitividade na definição de descontos e timing de campanhas, sem a
+restrição de sincronização que a Forte Store tem.
+
+**Implicação para o Neptune COS:** diferenças observadas entre as duas
+lojas (ex.: split de investimento, profundidade de desconto, timing de
+campanhas) podem refletir esta diferença estrutural, não necessariamente
+uma diferença de qualidade de execução entre as duas. O Decision Engine
+não deve tratar a Forte Store como benchmark direto da Mellmak (ou
+vice-versa) sem considerar esta restrição.
